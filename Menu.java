@@ -7,25 +7,16 @@ public class Menu {
 
     static Scanner sc = new Scanner(System.in);
 
-    // these will come from the other classes once we connect them
-    // for now just placeholder
-    static String accountName = "Chris P Pata";
-    static double balance = 15000.00;
-
-    public static void
-
-            main(String
-
-    [] args) {
-        {
-            Scanner sc = new Scanner(System.in);
-            AccountManager manager = new AccountManager();
-
-            Account loggedIn = null;
+    public static void main(String[] args){
+    
+        AccountManager manager = new AccountManager();
+        TransactionManager tm = new TransactionManager(); 
+        Account loggedIn = null;
 
             while (loggedIn == null) {
                 System.out.println("\nCreate Account");// 1
                 System.out.println("Login");// 2
+                System.out.print("Enter choice: ");
 
                 int choice = sc.nextInt();
                 sc.nextLine();
@@ -40,10 +31,9 @@ public class Menu {
                         loggedIn = manager.login(sc);
                         break;
 
+                    default:
+                        System.out.println("Invalid choice.");
                 }
-            }
-
-            sc.close();
         }
 
         boolean running = true;
@@ -52,29 +42,32 @@ public class Menu {
             displayMenu();
             int choice = handleUserChoice();
 
-            if (choice == 1) {
-                // TODO: call viewBalance() from Account class (Jays part)
-                System.out.println("View Balance - not yet connected");
-            } else if (choice == 2) {
-                // TODO: call deposit() from Transaction class (Mikes part)
-                System.out.println("Deposit - not yet connected");
-            } else if (choice == 3) {
-                // TODO: call withdraw() from Transaction class (Mikes part)
-                System.out.println("Withdraw - not yet connected");
-            } else if (choice == 4) {
-                saveReport();
-            } else if (choice == 5) {
-                System.out.println("Goodbye!");
-                running = false;
-            } else {
-                System.out.println("Invalid. Please enter 1-5 only.");
+            switch (choice){
+                case 1: //view balance
+                    System.out.printf("Current Balance: PHP %,.2f%n", loggedIn.getBalance());
+                    break;
+                case 2: //deposit
+                    tm.deposit(loggedIn, sc);
+                    break;
+                case 3: //withdraw
+                    tm.withdraw(loggedIn, sc);
+                    break;
+                case 4: //view transactions
+                    tm.viewTransactions;
+                    break;
+                case 5: //save report
+                    saveReport(loggedIn, tm);
+                    break;
+                case 6: //exit
+                    System.out.println("Goodbye!");
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Invalid. Please enter 1-6 only.");
             }
         }
 
-        sc
-                .
-
-                close();
+        sc.close();
     }
 
     public static void displayMenu() {
@@ -91,7 +84,7 @@ public class Menu {
     }
 
     public static int handleUserChoice() {
-        int choice = -1;
+        int choice;
 
         try {
             choice = Integer.parseInt(sc.nextLine());
@@ -99,11 +92,11 @@ public class Menu {
             // if user types letters just return -1 so it shows invalid
             choice = -1;
         }
-
         return choice;
     }
 
-    public static void saveReport() {
+    //save report
+    public static void saveReport(Account acc, TransactionManager tm) {
         try {
             FileWriter fw = new FileWriter("BankReport.txt");
             PrintWriter pw = new PrintWriter(fw);
@@ -111,8 +104,29 @@ public class Menu {
             pw.println("==============================");
             pw.println("         BANK REPORT          ");
             pw.println("==============================");
-            pw.println("Account Name : " + accountName);
-            pw.printf("Balance      : PHP %.2f%n", balance);
+
+            //account details
+            pw.println("Account Name : " + acc.getAccountNumber());
+            pw.println("Name         : " + acc.getName());
+            pw.printf("Balance      : PHP %,.2f%n", acc.getBalance());
+
+            //transaction history
+            pw.println("\nTRANSACTION HISTORY");
+            pw.println("------------------------------");
+
+            Transaction[] transactions = tm.getTransactions();
+            int count = tm.getCount();
+
+            if (count == 0){
+                pw.println("No transactions available.");
+            } else{
+                for (int i = 0; i < count; i++){
+                    pw.println(transactions[i]):
+                }
+            }
+
+            pw.println("\n==============================");
+            pw.println("       END OF REPORT          ");
             pw.println("==============================");
 
             pw.close();
