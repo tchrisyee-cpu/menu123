@@ -68,21 +68,25 @@ public class AccountManager {
             }
         } while (!isValidBirthDate(birthDate));
 
+        String pinString;
         int pin = 0;
         boolean validPin = false;
-        while (!validPin) {
-            try {
-                System.out.print("Enter 4-digit PIN: ");
-                pin = sc.nextInt();
 
-                if (pin >= 1000 && pin <= 9999) {
+        while (!validPin) {
+            System.out.print("Enter 4-digit PIN: ");
+            pinString = sc.nextLine().trim();
+
+            if (pinString.matches("\\d{4}")) {
+                try {
+                    pin = Integer.parseInt(pinString);
                     validPin = true;
-                } else {
-                    System.out.println("PIN must be exactly 4 digits.");
+
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid PIN format.");
+                    sc.nextLine();
                 }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. PIN must be numbers only.");
-                sc.nextLine();
+            } else {
+                System.out.println("PIN must be exactly 4 digits.");
             }
         }
 
