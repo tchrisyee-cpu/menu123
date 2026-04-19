@@ -1,17 +1,24 @@
-
 public class Account {
     private int accountNumber;
     private double balance;
-    private int pin;
+    private String pin;
     private String name;
     private String birthDate; // YYYY-MM-DD
+    
+    private TransactionManager transactionManager;
 
-    public Account(int accountNumber, String name, double balance, int pin, String birthDate) {
+    public Account(int accountNumber, String name, double balance, String pin, String birthDate) {
         this.accountNumber = accountNumber;
         this.name = name;
         this.balance = balance;
         this.pin = pin;
         this.birthDate = birthDate;
+        
+        this.transactionManager = new TransactionManager();
+    }
+    
+    public TransactionManager getTransactionManager(){
+        return transactionManager;
     }
 
     public int getAccountNumber() {
@@ -22,7 +29,7 @@ public class Account {
         return name;
     }
 
-    public int getPin() {
+    public String getPin() {
         return pin;
     }
 
