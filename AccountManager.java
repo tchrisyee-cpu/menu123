@@ -6,6 +6,8 @@ import java.time.format.DateTimeParseException;
 import java.util.InputMismatchException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 public class AccountManager {
 
@@ -14,7 +16,11 @@ public class AccountManager {
     private int count = 0;
 
     private int generateAccountNumber() {
-        return 100000 + rand.nextInt(900000);
+        int accNum;
+        do{
+            accNum = 100000 + rand.nextInt(900000);
+        } while(getAccount(accNum) != null);
+        return accNum;
     }
 
     private boolean isValidName(String name) {
@@ -68,23 +74,14 @@ public class AccountManager {
             }
         } while (!isValidBirthDate(birthDate));
 
-        String pinString;
-        int pin = 0;
+        String pin = "";
         boolean validPin = false;
-
         while (!validPin) {
             System.out.print("Enter 4-digit PIN: ");
-            pinString = sc.nextLine().trim();
+            pin = sc.nextLine();
 
-            if (pinString.matches("\\d{4}")) {
-                try {
-                    pin = Integer.parseInt(pinString);
-                    validPin = true;
-
-                } catch (NumberFormatException e) {
-                    System.out.println("Invalid PIN format.");
-                    sc.nextLine();
-                }
+            if (pin.matches("\\d{4}")) {
+                validPin = true;
             } else {
                 System.out.println("PIN must be exactly 4 digits.");
             }
@@ -125,7 +122,12 @@ public class AccountManager {
         return null;
     }
 
-    public boolean addAccount(int accNum, String name, double balance, int pin, String birthDate) {
+    public boolean addAccount(int accNum, String name, double balance, String pin, String birthDate) {
+        if (count >= accounts.length){
+            System.out.println("Account limit reached.");
+            return false;
+        }
+        
         accounts[count] = new Account(accNum, name, balance, pin, birthDate);
         count++;
 
@@ -135,37 +137,61 @@ public class AccountManager {
     }
 
     public Account login(Scanner sc) {
-        int attempts = 1;
-
         System.out.print("Enter Account Number: ");
-        int accNum = sc.nextInt();
-
-        do {
-            try {
-                System.out.print("Enter PIN: ");
-                int pin = sc.nextInt();
-
-                Account acc = getAccount(accNum);
-
-                if (acc != null && acc.getPin() == pin) {
-                    System.out.println("Login successful!");
-                    return acc;
-                } else {
-                    System.out.println("Invalid PIN.");
-                    attempts++;
-
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Numbers only.");
-                sc.nextLine();
+        int accNum;
+        
+        try{
+            accNum = Integer.parseInt(sc.nextLine());
+        } catch (NumberFormatException e){
+            System.out.println("Invalid account number.");
+            return null;
+        }
+        
+        Account acc = getAccount(accNum);
+        
+        if (acc == null){
+            System.out.println("Account not found.");
+            return null;
+        }
+        
+        int attempts = 1;
+        
+        do{
+            System.out.print("Enter PIN: ");
+            String pin = sc.nextLine();
+            
+            if (acc.getPin().equals(pin)){
+                System.out.println("Login successful!");
+                return acc;
+            } else{
+                System.out.println("Invalid PIN.");
                 attempts++;
             }
         } while (attempts <= 3);
-        if (attempts > 3) {
-            System.out.println("You have been locked out.");
-
-        }
+        
+        System.out.println("You have been locked out.");
         return null;
+    }
+    
+    public void loadFromFile(){
+        try (BufferedReader br = new BufferedReader(new FileReader("accounts.txt"))) {
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+
+                int accNum = Integer.parseInt(data[0]);
+                String name = data[1];
+                String pin = data[2];
+                String birthDate = data[3];
+                double balance = Double.parseDouble(data[4]);
+
+                accounts[count++] = new Account(accNum, name, balance, pin, birthDate);
+            }
+
+        } catch (IOException e) {
+            System.out.println("No previous accounts found.");
+        }
     }
 
     public void saveToFile() {
