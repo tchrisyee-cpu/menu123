@@ -13,6 +13,7 @@ public class TransactionManager {
         try {
             System.out.print("Enter deposit amount: ");
             amount = sc.nextDouble();
+            sc.nextLine();
 
             if (amount <= 0) {
                 System.out.println("Amount must be positive.");
@@ -37,6 +38,7 @@ public class TransactionManager {
         try {
             System.out.print("Enter withdraw amount: ");
             amount = sc.nextDouble();
+            sc.nextLine();
 
             if (amount <= 0) {
                 System.out.println("Amount must be positive.");
