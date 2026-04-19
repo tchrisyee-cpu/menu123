@@ -10,16 +10,20 @@ public class Menu {
     public static void main(String[] args){
     
         AccountManager manager = new AccountManager();
-        TransactionManager tm = new TransactionManager(); 
+        manager.loadFromFile();
         Account loggedIn = null;
 
             while (loggedIn == null) {
-                System.out.println("\nCreate Account");// 1
-                System.out.println("Login");// 2
+                System.out.println("\n1. Create Account");// 1
+                System.out.println("2. Login");// 2
                 System.out.print("Enter choice: ");
 
-                int choice = sc.nextInt();
-                sc.nextLine();
+                int choice;
+                try{
+                    choice = Integer.parseInt(sc.nextLine());
+                } catch (NumberFormatException e){
+                    choice = -1;
+                }
 
                 switch (choice) {
                     case 1:
@@ -36,27 +40,35 @@ public class Menu {
                 }
         }
 
+        //main menu loop
         boolean running = true;
 
         while (running) {
             displayMenu();
-            int choice = handleUserChoice();
-
+            int choice;
+                try{
+                    choice = Integer.parseInt(sc.nextLine());
+                } catch (NumberFormatException e){
+                    choice = -1;
+                }
+            
             switch (choice){
                 case 1: //view balance
                     System.out.printf("Current Balance: PHP %,.2f%n", loggedIn.getBalance());
                     break;
                 case 2: //deposit
-                    tm.deposit(loggedIn, sc);
+                    loggedIn.getTransactionManager().deposit(loggedIn, sc);
+                    manager.saveToFile();
                     break;
                 case 3: //withdraw
-                    tm.withdraw(loggedIn, sc);
+                    loggedIn.getTransactionManager().withdraw(loggedIn, sc);
+                    manager.saveToFile();
                     break;
                 case 4: //view transactions
-                    tm.viewTransactions;
+                    loggedIn.getTransactionManager().viewTransactions();
                     break;
                 case 5: //save report
-                    saveReport(loggedIn, tm);
+                    saveReport(loggedIn);
                     break;
                 case 6: //exit
                     System.out.println("Goodbye!");
@@ -77,8 +89,9 @@ public class Menu {
         System.out.println("1. View Balance");
         System.out.println("2. Deposit");
         System.out.println("3. Withdraw");
-        System.out.println("4. Save Report");
-        System.out.println("5. Exit");
+        System.out.println("4. View Transactions");
+        System.out.println("5. Save Report");
+        System.out.println("6. Exit");
         System.out.println("==============================");
         System.out.print("Enter choice: ");
     }
@@ -96,7 +109,7 @@ public class Menu {
     }
 
     //save report
-    public static void saveReport(Account acc, TransactionManager tm) {
+    public static void saveReport(Account acc) {
         try {
             FileWriter fw = new FileWriter("BankReport.txt");
             PrintWriter pw = new PrintWriter(fw);
@@ -106,14 +119,16 @@ public class Menu {
             pw.println("==============================");
 
             //account details
-            pw.println("Account Name : " + acc.getAccountNumber());
-            pw.println("Name         : " + acc.getName());
-            pw.printf("Balance      : PHP %,.2f%n", acc.getBalance());
+            pw.println("Account Number : " + acc.getAccountNumber());
+            pw.println("Name           : " + acc.getName());
+            pw.printf("Balance        : PHP %,.2f%n", acc.getBalance());
+            
+            TransactionManager tm = acc.getTransactionManager();
 
             //transaction history
             pw.println("\nTRANSACTION HISTORY");
             pw.println("------------------------------");
-
+            
             Transaction[] transactions = tm.getTransactions();
             int count = tm.getCount();
 
@@ -121,7 +136,7 @@ public class Menu {
                 pw.println("No transactions available.");
             } else{
                 for (int i = 0; i < count; i++){
-                    pw.println(transactions[i]):
+                    pw.println(transactions[i]);
                 }
             }
 
